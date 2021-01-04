@@ -99,7 +99,7 @@ void decoder(InS One){
                 set1_Bit(&reg[1], 14);
             }
             if ((int)((int)reg[One.R1] + (int)reg[One.R2]) > sizeof(short) && get_Bit(reg[1], 15) == 1){
-                // 부호있는 연산의 캐리 여부 확인
+                // 부호있는 연산의 오버플로우 여부 확인
                 set1_Bit(&reg[1], 12);
             }
         break;
