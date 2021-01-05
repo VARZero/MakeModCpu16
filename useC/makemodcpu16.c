@@ -200,5 +200,15 @@ void decoder(InS One){
 int main(){
     reg[0] = 0;
     Ram = malloc(2048);
-    
+    short oneline;
+    FILE* Rom = fopen("Rom", "rb");
+    while(feof(Rom)){
+        fread(&oneline, 2, 1, Rom);
+        InS IST;
+        IST.opcode = oneline & 61440;
+        IST.Rn = oneline & 3840;
+        IST.R1 = (oneline & 240) << 4;
+        IST.R2 = (oneline & 15) << 8;
+        decoder(IST);
+    }
 }
