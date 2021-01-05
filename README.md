@@ -61,4 +61,4 @@ C++으로는 C언어보다 구체적으로 작성할 예정입니다.<br>
 |1100|AND|Rn = R1 (AND) R2|
 |1101|OR|Rn = R1 (OR) R2|
 |1110|XOR|Rn = R1 (XOR) R2|
-|1111|NOT|Rn = (NOT) R1|
+|1111|NOT|Rn = (NOT) R1 / status 레지스터 접근시 R2가 0이면 양수, 1이면 음수로 지정|

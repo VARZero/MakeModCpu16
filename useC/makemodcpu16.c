@@ -45,13 +45,29 @@ int get_Bit(short val, int n){
     return (val & (1 << n)) >> n;
 }
 
+void set0_Bit(short* val, int n){
+    *val = *val & (0 << n) >> n;
+}
+
 void set1_Bit(short* val, int n){
     *val = *val | (1 << n) >> n;
 }
 
 void decoder(InS One){
     Opc = One.opcode;
-    if (One.Rn == 1){return;} // status 레지스터는 직접 접근할 수 없습니다. 아키텍쳐 상에서 인터럽트 바로 걸어버림
+    if (One.Rn == 1){
+        if (Opc == NOT){
+            switch(One.R2){
+                case 0:
+                    set0_Bit(reg[1], 15);
+                break;
+                case 1:
+                    set1_Bit(reg[1], 15);
+                break;
+            }
+        }
+        return;
+    } // status 레지스터는 NOT 명령어에세만 동작합니다 (양-음수 여부 변경만 가능)
     switch(Opc){
         case MOV:
             MOO = One.R2;
@@ -85,11 +101,18 @@ void decoder(InS One){
         break;
         case SL:
             reg[One.Rn] << One.R1;
+            if (reg[One.Rn] == 0){
+                set1_Bit(&reg[1], 13);
+            }
         break;
         case SR:
             reg[One.Rn] >> One.R1;
+            if (reg[One.Rn] == 0){
+                set1_Bit(&reg[1], 13);
+            }
         break;
         case ADD:
+            reg[1] = 0;
             reg[One.Rn] = reg[One.R1] + reg[One.R2];
             if (reg[One.Rn] == 0){
                 set1_Bit(&reg[1], 13);
@@ -104,26 +127,71 @@ void decoder(InS One){
             }
         break;
         case SUB:
+            reg[1] = 0;
             reg[One.Rn] = reg[One.R1] - reg[One.R2];
+            if (reg[One.Rn] == 0){
+                set1_Bit(&reg[1], 13);
+            }
+            if ((unsigned int)((unsigned int)reg[One.R1] - (unsigned int)reg[One.R2]) > sizeof(unsigned short) && get_Bit(reg[1], 15) == 0){
+                // 부호없는 연산의 캐리 여부 확인
+                set1_Bit(&reg[1], 14);
+            }
+            if ((int)((int)reg[One.R1] - (int)reg[One.R2]) > sizeof(short) && get_Bit(reg[1], 15) == 1){
+                // 부호있는 연산의 오버플로우 여부 확인
+                set1_Bit(&reg[1], 12);
+            }
         break;
         case MUL:
+            reg[1] = 0;
             reg[One.Rn] = reg[One.R1] * reg[One.R2];
+            if (reg[One.Rn] == 0){
+                set1_Bit(&reg[1], 13);
+            }
+            if ((unsigned int)((unsigned int)reg[One.R1] * (unsigned int)reg[One.R2]) > sizeof(unsigned short) && get_Bit(reg[1], 15) == 0){
+                // 부호없는 연산의 캐리 여부 확인
+                set1_Bit(&reg[1], 14);
+            }
+            if ((int)((int)reg[One.R1] * (int)reg[One.R2]) > sizeof(short) && get_Bit(reg[1], 15) == 1){
+                // 부호있는 연산의 오버플로우 여부 확인
+                set1_Bit(&reg[1], 12);
+            }
         break;
         case DIV:
+            reg[1] = 0;
+            if (reg[One.R1] == 0 || reg[One.R2] == 0){break;}
             reg[One.Rn] = reg[One.R1] / reg[One.R2];
             reg[15] = reg[One.R1] % reg[One.R2];
+            if (reg[One.Rn] == 0){
+                set1_Bit(&reg[1], 13);
+            }
         break;
         case AND:
+            reg[1] = 0;
             reg[One.Rn] = reg[One.R1] & reg[One.R2];
+            if (reg[One.Rn] == 0){
+                set1_Bit(&reg[1], 13);
+            }
         break;
         case OR:
+            reg[1] = 0;
             reg[One.Rn] = reg[One.R1] | reg[One.R2];
+            if (reg[One.Rn] == 0){
+                set1_Bit(&reg[1], 13);
+            }
         break;
         case XOR:
+            reg[1] = 0;
             reg[One.Rn] = reg[One.R1] ^ reg[One.R2];
+            if (reg[One.Rn] == 0){
+                set1_Bit(&reg[1], 13);
+            }
         break;
         case NOT:
+            reg[1] = 0;
             reg[One.Rn] = !reg[One.R1];
+            if (reg[One.Rn] == 0){
+                set1_Bit(&reg[1], 13);
+            }
         break;
     }
     reg[0] = 0; // zero 레지스터는 항상 0을 유지하도록 돌아갑니다.
@@ -132,4 +200,5 @@ void decoder(InS One){
 int main(){
     reg[0] = 0;
     Ram = malloc(2048);
+    
 }
