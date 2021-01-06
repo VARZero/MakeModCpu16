@@ -1,2 +1,3 @@
 /MakeModCPU.code-workspace
 useC/Rom
+*.out

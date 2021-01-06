@@ -1,7 +1,9 @@
+#define RAM_SIZE 2048
+
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned short reg[16]; //zero, status, PC, SP, BACK, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10;
+unsigned short reg[16] = 0; //zero, status, PC, SP, BACK, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10;
 
 enum Opcodes{
     MOV = 1,
@@ -55,14 +57,15 @@ void set1_Bit(short* val, int n){
 
 void decoder(InS One){
     Opc = One.opcode;
+    char temp = reg[2]; // pc레지스터 변화 여부 확인 (PC레지스터는 일반 레지스터와 다르게 동작합니다.)
     if (One.Rn == 1){
         if (Opc == NOT){
             switch(One.R2){
                 case 0:
-                    set0_Bit(reg[1], 15);
+                    set0_Bit(&reg[1], 15);
                 break;
                 case 1:
-                    set1_Bit(reg[1], 15);
+                    set1_Bit(&reg[1], 15);
                 break;
             }
         }
@@ -195,20 +198,38 @@ void decoder(InS One){
         break;
     }
     reg[0] = 0; // zero 레지스터는 항상 0을 유지하도록 돌아갑니다.
+    if (reg[2] == temp){reg[2] += 2;} // PC레지스터가 변화하지 않았으면 +2하도록 함
 }
 
 int main(){
     reg[0] = 0;
-    Ram = malloc(2048);
-    short oneline;
+    int i = 0;
+    Ram = malloc(RAM_SIZE);
+    unsigned short oneline;
     FILE* Rom = fopen("Rom", "rb");
-    while(feof(Rom)){
-        fread(&oneline, 2, 1, Rom);
+    printf("start\n");
+
+    // 롬에서 램으로 데이터 갖고 오자
+    while(feof(Rom) == 0){
+        if (i == RAM_SIZE){
+            break;
+        }
+        fread(Ram[i], 2, 1, Rom);
+        i++;
+    }
+    fclose(Rom);
+    
+    reg[14] = 1536; //최초 실행시 데이터 영역의 주소를 저장
+    while(1)
+    {
+        oneline = Ram[reg[2]];
         InS IST;
-        IST.opcode = oneline & 61440;
-        IST.Rn = oneline & 3840;
-        IST.R1 = (oneline & 240) << 4;
-        IST.R2 = (oneline & 15) << 8;
+        printf("%x\n", oneline);
+        IST.opcode = (char)((oneline & 61440) >> 8);
+        IST.Rn = (char)((oneline & 3840) >> 4);
+        IST.R1 = (char)(oneline & 240);
+        IST.R2 = (char)(oneline & 15);
+        printf("line %x %x %x %x\n", IST.opcode, IST.Rn, IST.R1, IST.R2);
         decoder(IST);
     }
 }
