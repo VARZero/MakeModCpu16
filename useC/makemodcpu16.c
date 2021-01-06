@@ -13,7 +13,7 @@ enum Opcodes{
     POP,
     SL,
     SR,
-    ADD = 9,
+    ADD,
     SUB,
     MUL,
     DIV,
@@ -30,7 +30,7 @@ enum movOpcOption{
     L,
     RSAME,
     R,
-    BACK = 9
+    BACK = 8
 }MOO;
 
 short* Ram;
