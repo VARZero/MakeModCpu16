@@ -82,7 +82,7 @@ char* trOpcode(char* opcode, char* out2){
 
 char* trReg(char* reg){
     char* out1;
-    if(strcmp(reg, "zero") == 0){
+    if(strcmp(reg, "zero ") == 0){
         *out1 = 0;
     }
     else if(strcmp(reg, "csr ") == 0){
@@ -142,6 +142,9 @@ int main(int argc, char* argv[]){
         printf("Error!: no input file.\n");
     }
 
+    long dataSec = 0;
+    long curLoca;
+
     char oneline[25];
     FILE* ASMFILE = fopen(argv[1], "rt");
     char filename[256] = argv[1];
@@ -153,13 +156,24 @@ int main(int argc, char* argv[]){
         line++;
         fgets(&oneline, 24, ASMFILE);
         
+        if (oneline[0] == '/'){
+            curLoca = ftell(BINARYFILE);
+            // 데이터 영역
+            char* data = &oneline[1];
+            fseek(BINARYFILE, 1024+dataSec, SEEK_SET);
+            fwrite(data, 2, 1, BINARYFILE);
+            dataSec += 2;
+
+            fseek(BINARYFILE, curLoca, SEEK_SET);
+        }
+
         char* linesl = strtok(oneline, " ");
         char copcode[6] = linesl;
         
-        linesl = strtok(NULL, ",");
+        linesl = strtok(NULL, " ");
         char cRn[6] = linesl;
 
-        linesl = strtok(NULL, ",");
+        linesl = strtok(NULL, " ");
         char cR1[6] = linesl;
 
         linesl = strtok(NULL, "\n");
@@ -177,9 +191,11 @@ int main(int argc, char* argv[]){
         
         if (out2 != NULL){
             oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (int)(*bR1 << 4) + iR2;
-            break;
+            fwrite(oneinstr, 4, 1, BINARYFILE);
+            continue;
         }
         oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (int)(*bR1 << 4) + (int)(*bR2);
+        fwrite(oneinstr, 4, 1, BINARYFILE);
     }
     fclose(ASMFILE);
     fclose(BINARYFILE);
