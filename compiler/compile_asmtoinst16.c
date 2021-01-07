@@ -1,5 +1,6 @@
 #define enumtostring(x) #x
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 int line = 0;
@@ -25,6 +26,7 @@ char* trOpcode(char* opcode, char* out2){
     char* out1;
     if(strcmp(opcode, "mov ") == 0){
         *out1 = 1;
+        *out2 = 1;
     }
     else if(strcmp(opcode, "load ") == 0){
         *out1 = 2;
@@ -40,9 +42,11 @@ char* trOpcode(char* opcode, char* out2){
     }
     else if(strcmp(opcode, "sl ") == 0){
         *out1 = 6;
+        *out2 = 1;
     }
     else if(strcmp(opcode, "sr ") == 0){
         *out1 = 7;
+        *out2 = 1;
     }
     else if(strcmp(opcode, "add ") == 0){
         *out1 = 8;
@@ -67,6 +71,7 @@ char* trOpcode(char* opcode, char* out2){
     }
     else if(strcmp(opcode, "not ") == 0){
         *out1 = 15;
+        *out2 = 1;
     }
     else{
         printf("Compile Error! Unknown Opcode! %d line '%s' \n", line, *out1);
@@ -157,8 +162,9 @@ int main(int argc, char* argv[]){
         linesl = strtok(NULL, ",");
         char cR1[6] = linesl;
 
-        linesl = strtok(NULL, ",");
+        linesl = strtok(NULL, "\n");
         char cR2[6] = linesl;
+        int iR2 = atoi(cR2);
         strcat(cR2, " ");
 
         int oneinstr;
@@ -170,7 +176,7 @@ int main(int argc, char* argv[]){
         char* bR2 = trReg(cR2);
         
         if (out2 != NULL){
-            // 수정바람. trOpcode부분도 수정해야됨
+            oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (int)(*bR1 << 4) + iR2;
             break;
         }
         oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (int)(*bR1 << 4) + (int)(*bR2);
