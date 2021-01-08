@@ -1,4 +1,3 @@
-#define enumtostring(x) #x
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -137,23 +136,25 @@ char* trReg(char* reg){
     return out1;
 }
 
-int main(int argc, char* argv[]){
+int main(int argc, char *argv[]){
     if (argc != 2){
         printf("Error!: no input file.\n");
     }
-
+    printf("%s\n", argv[1]);
+    
     long dataSec = 0;
     long curLoca;
 
     char oneline[25];
     FILE* ASMFILE = fopen(argv[1], "rt");
-    char filename[256] = argv[1];
-    char* filen = strtok(filename, ".");
+    //char* filename = argv[1];
+    char* filen = strtok(argv[1], ".");
 
     FILE* BINARYFILE = fopen(strcat(filen, ".bin"), "wb");
     
     while(!feof(ASMFILE)){
         line++;
+        printf("a");
         fgets(&oneline, 24, ASMFILE);
         
         if (oneline[0] == '/'){
@@ -167,17 +168,13 @@ int main(int argc, char* argv[]){
             fseek(BINARYFILE, curLoca, SEEK_SET);
         }
 
-        char* linesl = strtok(oneline, " ");
-        char copcode[6] = linesl;
-        
-        linesl = strtok(NULL, " ");
-        char cRn[6] = linesl;
+        char* copcode = strtok(oneline, " ");
 
-        linesl = strtok(NULL, " ");
-        char cR1[6] = linesl;
+        char* cRn = strtok(NULL, " ");
 
-        linesl = strtok(NULL, "\n");
-        char cR2[6] = linesl;
+        char* cR1 = strtok(NULL, " ");
+
+        char* cR2 = strtok(NULL, "\n");
         int iR2 = atoi(cR2);
         strcat(cR2, " ");
 
@@ -191,11 +188,11 @@ int main(int argc, char* argv[]){
         
         if (out2 != NULL){
             oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (int)(*bR1 << 4) + iR2;
-            fwrite(oneinstr, 4, 1, BINARYFILE);
+            fwrite(&oneinstr, 4, 1, BINARYFILE);
             continue;
         }
         oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (int)(*bR1 << 4) + (int)(*bR2);
-        fwrite(oneinstr, 4, 1, BINARYFILE);
+        fwrite(&oneinstr, 4, 1, BINARYFILE);
     }
     fclose(ASMFILE);
     fclose(BINARYFILE);
