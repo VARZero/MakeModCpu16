@@ -23,7 +23,11 @@ typedef struct instr{
 
 char* trOpcode(char* opcode, char* out2){
     char* out1;
-    if(strcmp(opcode, "mov ") == 0){
+    if(strcmp(opcode, "imm ") == 0){
+        *out1 = 0;
+        *out2 = 2;
+    }
+    else if(strcmp(opcode, "mov ") == 0){
         *out1 = 1;
         *out2 = 1;
     }
@@ -145,8 +149,8 @@ int main(int argc, char *argv[]){
     long dataSec = 0;
     long curLoca;
 
-    char oneline[25];
-    FILE* ASMFILE = fopen(argv[1], "rt");
+    char oneline[40];
+    FILE* ASMFILE = fopen(argv[1], "r");
     //char* filename = argv[1];
     char* filen = strtok(argv[1], ".");
 
@@ -154,10 +158,10 @@ int main(int argc, char *argv[]){
     
     while(!feof(ASMFILE)){
         line++;
+        fgets(oneline, 39, ASMFILE);
+        printf("%s\n", oneline);
         printf("a");
-        fgets(&oneline, 24, ASMFILE);
-        
-        if (oneline[0] == '/'){
+        /*if (oneline[0] == '/'){
             curLoca = ftell(BINARYFILE);
             // 데이터 영역
             char* data = &oneline[1];
@@ -166,16 +170,19 @@ int main(int argc, char *argv[]){
             dataSec += 2;
 
             fseek(BINARYFILE, curLoca, SEEK_SET);
-        }
-
+        }*/
+        printf("b");
         char* copcode = strtok(oneline, " ");
-
+        printf("c");
         char* cRn = strtok(NULL, " ");
-
+        printf("d");
         char* cR1 = strtok(NULL, " ");
-
+        printf("e");
+        int iR1 = atoi(cR1);
         char* cR2 = strtok(NULL, "\n");
+        printf("f");
         int iR2 = atoi(cR2);
+        printf("g");
         strcat(cR2, " ");
 
         int oneinstr;
@@ -187,6 +194,10 @@ int main(int argc, char *argv[]){
         char* bR2 = trReg(cR2);
         
         if (out2 != NULL){
+            if (out2 == 2){
+                oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (iR1 << 4) + iR2;
+                continue;
+            }
             oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (int)(*bR1 << 4) + iR2;
             fwrite(&oneinstr, 4, 1, BINARYFILE);
             continue;

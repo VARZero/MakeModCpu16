@@ -6,7 +6,8 @@
 unsigned short reg[16] = 0; //zero, status, PC, SP, BACK, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10;
 
 enum Opcodes{
-    MOV = 1,
+    IMM,
+    MOV,
     LOAD,
     SAVE,
     PUSH,
@@ -72,6 +73,9 @@ void decoder(InS One){
         return;
     } // status 레지스터는 NOT 명령어에세만 동작합니다 (양-음수 여부 변경만 가능)
     switch(Opc){
+        case IMM:
+            reg[One.Rn] = (short)( One.R2 >> (4*get_Bit(One.R1, 3) + 3*get_Bit(One.R1, 2) + 2*get_Bit(One.R1, 1) + 1*get_Bit(One.R1, 0)) );
+        break;
         case MOV:
             MOO = One.R2;
             if (!(MOO == NONE) || // 조건이 아예 없을때
