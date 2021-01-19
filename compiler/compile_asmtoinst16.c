@@ -168,13 +168,12 @@ int main(int argc, char *argv[]){
         char* cR1 = strtok(NULL, " ");
         printf("e");
         int iR1 = atoi(cR1);
-        char* cR2 = strtok(NULL, "\n");
+        char* cR2 = strtok(NULL, " ");
         printf("f");
         int iR2 = atoi(cR2);
         printf("g");
-        strcat(cR2, " ");
 
-        int oneinstr;
+        short oneinstr;
 
         char out2 = 0;
         char* bOpcode = trOpcode(copcode, &out2);
@@ -190,16 +189,16 @@ int main(int argc, char *argv[]){
 
         if (out2 != 0){
             if (out2 == 2){
-                oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (iR1 << 4) + iR2;
+                oneinstr = (short)(*bOpcode << 12) + (short)(*bRn << 8) + (iR1 << 4) + iR2;
                 free(bOpcode);free(bRn);
                 continue;
             }
-            oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (int)(*bR1 << 4) + iR2;
+            oneinstr = (short)(*bOpcode << 12) + (short)(*bRn << 8) + (short)(*bR1 << 4) + iR2;
             free(bOpcode);free(bRn);free(bR1);
             fwrite(&oneinstr, 4, 1, BINARYFILE);
             continue;
         }
-        oneinstr = (int)(*bOpcode << 12) + (int)(*bRn << 8) + (int)(*bR1 << 4) + (int)(*bR2);
+        oneinstr = (short)(*bOpcode << 12) + (short)(*bRn << 8) + (short)(*bR1 << 4) + (short)(*bR2);
         free(bOpcode);free(bRn);free(bR1);free(bR2);
         fwrite(&oneinstr, 4, 1, BINARYFILE);
     }
