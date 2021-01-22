@@ -27,7 +27,7 @@ char* trOpcode(char* opcode, char* out2){
         *out1 = 0;
         *out2 = 2;
     }
-    else if(strcmp(opcode, "mov") == 0){
+    else if(strcmp(opcode, "jump") == 0){
         *out1 = 1;
         *out2 = 1;
     }

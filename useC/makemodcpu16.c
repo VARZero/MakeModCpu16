@@ -7,7 +7,7 @@ unsigned short reg[16] = 0; //zero, status, PC, SP, BACK, r1, r2, r3, r4, r5, r6
 
 enum Opcodes{
     IMM,
-    MOV,
+    JUMP,
     LOAD,
     SAVE,
     PUSH,
@@ -76,7 +76,7 @@ void decoder(InS One){
         case IMM:
             reg[One.Rn] = (short)( One.R2 >> (4*get_Bit(One.R1, 3) + 3*get_Bit(One.R1, 2) + 2*get_Bit(One.R1, 1) + 1*get_Bit(One.R1, 0)) );
         break;
-        case MOV:
+        case JUMP:
             MOO = One.R2;
             if (!(MOO == NONE) || // 조건이 아예 없을때
             (!(MOO == SAME && get_Bit(reg[1], 13) == 1)) || // = 
