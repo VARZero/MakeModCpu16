@@ -1,3 +1,5 @@
+// 수정 아직 안됨
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
