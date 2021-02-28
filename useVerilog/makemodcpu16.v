@@ -14,7 +14,7 @@ module vz16 (
     reg [15:0] REGs[13]; // sp ~ r11
     reg [2:0] ALUo;
     reg option;
-    reg ALU, LS, STACK, Shift;
+    reg ALU, LS, STACK, Shift, MEM;
 
     // 옵코드 구분
     reg [3:0] Rn;
@@ -35,6 +35,7 @@ module vz16 (
         LS <= (ALU) ? 0 : ~instrBus[2] & instrBus[1];
         STACK <= (ALU) ? 0 : instrBus[2] & ~instrBus[1];
         Shift <= (ALU) ? 0 : instrBus[2] & instrBus[1];
+        MEM <= (ALU) ? 0 : ~STACK & ~Shift;
         
         Rn <= instrBus[7:4];
         R1 <= instrBus[8:11];
@@ -92,12 +93,56 @@ module vz16 (
             else if (ALUo == 3'b111 && Rn == 4'b0001) begin
                 status[15] <= R1[0]; // sign 여부 비트 설정
             end
+
+            // 레지스터에 저장
+            if (Rn > 2) begin
+                REGs[Rn - 2] <= VRn;
+            end
         end
 
         // Shift
         if (Shift) begin
-            
+            VR1 <= 4'b0000;
+            if (R1 > 2) begin
+                VR1 <= REGs[R1 - 2];
+            end
+            if (option == 1'b0) begin
+                // SL
+                VR1 << R2;
+            end
+            else if (option == 1'b1) begin
+                // SR
+                VR1 >> R2;
+            end
+
+            // 레지스터에 저장
+            if (Rn > 2) begin
+                REGs[Rn - 2] <= VRn;
+            end
         end
 
+        // STACK
+        if (STACK) begin
+            VR1 <= 4'b0000;
+            if (R1 > 2) begin
+                VR1 <= REGs[R1 - 2];
+            end
+            else if (R1 == 1) begin
+                VR1 <= status;
+            end
+            if (option == 1'b0) begin
+                // PUSH
+                REGs[0] <= REGs[0] + 2;
+                dataOutBus <= VR1;
+                addrBus <= REGs[0];
+            end
+            else if (option == 1'b1) begin
+                // POP
+                addrBus <= REGs[0];
+                REGs[0] <= REGs[0] - 2;
+
+                // 의문점: 이거 바로 해봤자 안되는데 딜레이는 어떻게 걸지?
+                
+            end
     end
 endmodule
